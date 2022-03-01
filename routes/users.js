@@ -6,9 +6,9 @@ const Sequelize = require("sequelize");
 
 /* GET users listing. */
 router.get("/", async function (req, res, next) {
-  // res.send("respond with a resource");
-  const users = await Users.findAll();
-  res.json(users);
+  res.render("index");
+  // const users = await Users.findAll();
+  // res.json(users);
 });
 
 router.post("/register", async (req, res, next) => {
@@ -22,7 +22,7 @@ router.post("/register", async (req, res, next) => {
   });
 
   res.json({
-    newUser,
+    username: newUser.username,
   });
   console.log("added new user:", username, password, email);
 });
@@ -41,22 +41,26 @@ router.post("/", (req, res, next) => {
   res.send("new user added");
 });
 
-router.post("/login", (req, res, next) => {
-  const password = "hello";
-  const wrongPassword = "goodbye";
+router.post("/login", async (req, res, next) => {
+  const { username, password } = req.body;
+  //takes in username and password values from the "name" properties in the index.ejs file
 
   const saltRounds = bcrypt.genSaltSync(5);
   const hash = bcrypt.hashSync(password, saltRounds);
   const comparePassword = bcrypt.compareSync(password, hash);
-  const wrongComparePassword = bcrypt.compareSync(wrongPassword, hash);
   //compareSync outputs a boolean
 
-  console.log("my password:", password);
-  console.log("my hashed password:", hash);
-  console.log("is correct password correct?:", comparePassword);
-  console.log("is wrong password correct?:", wrongComparePassword);
+  const users = await Users.findOne({
+    where: {
+      username: username,
+      //checking to see if input username matches with a username in DB
+    },
+  });
+  res.json(users);
 
-  res.send("password checked");
+  console.log(users);
+
+  // res.render("index");
 });
 
 module.exports = router;
